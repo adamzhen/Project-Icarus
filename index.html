@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/SunLogo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="navBar.js"></script>
+    <title>SpaceAppWeb</title>
+  </head>
+
+  <body>
+
+    <!--Hero Section-->
+    <div class="hero" id="begin">
+      <img src="/ProjectIcarusHeader.png" id="logo">
+      <nav class="navbar">
+        <div class="navbar-container container">
+          <input type="checkbox" name="" id="" />
+          <div class="hamburger-lines">
+            <span class="line line1"></span>
+            <span class="line line2"></span>
+            <span class="line line3"></span>
+          </div>
+          <ul class="menu-items">
+            <li><a href="#begin">Home</a></li>
+            <li><a href="#sun">Sun</a></li>
+            <li><a href="#yess">Parker Space Probe</a></li>
+            <li><a href="#corona">The Big Ol' Corona</a></li>
+            <li><a href="#light">WISPR</a></li>
+            <li><a href="./about.html">About Us</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <!--Scroll Down Button-->
+    <div class="scroll">
+      <button id="first" onclick="location.href='#sun'">
+        <p>click to start your journey</p>
+      </button>
+    </div>
+
+    <!--Sun :D-->
+    <div id="sun">
+      <img src="sun.jpg">
+      <h2><em>ever wondered what it'd be like. . .</em></h2>
+      <h1><em>TO TOUCH THE SUN?</em></h1>
+    </div>
+
+    <!--3D Interactive Model-->
+    <div class="modelcontainer" id="yess">
+      <h2><em>Introducing the All-New</em></h2>
+      <h1>PARKER SOLAR PROBE</h1>
+      <h2><em>by NASA</em></h2>
+      <h3>available for just $1,500,000,000 USD</h3>
+      <canvas id="parker"></canvas>
+      <script type="module" src="/threeD.js"></script>
+      <h4>To be clear, we are not NASA. You can’t actually buy the Parker Space Probe. And just so you know, 
+        you’re also a little late if you were hoping to stowaway behind the heat shield. The PSP (which is what 
+        cool people call it) already launched into space on August 12, 2018. Not only that, but it already touched the sun on April 28, 2021. 
+      </h4>
+    </div>
+
+    <!--Corona thang-->
+    <div id="corona">
+      <h1>The Big Ol' Corona</h1>
+      <img src="CoronaSunSTART_4.1.1.png" id="vidPlayImg">
+      <video autoplay muted loop id="vid">
+        <source src="CoronaSunVIDEO1.mp4" type="video/mp4">
+      </video>
+      <script type="text/javascript">
+        document.getElementById("vidPlayImg").onclick = function() {
+          document.getElementById("vidPlayImg").style.display="none";
+          document.getElementById("vid").style.display="block";
+        }
+      </script>
+    </div>
+    <!--<script type="module" src="/vid.js"></script>-->
+
+    <!--WISPR Thing-->
+    <div id="light">
+      <h1>Lights</h1>
+      <div id="lightimg"></div>
+    </div>
+    <div id="camera">
+      <h1>Camera</h1>
+      <div id="camimg">
+        <!--<img src="WISPR_Camera_OFF_5.1.2.png">-->
+      </div>
+    </div>
+    <div id="action">
+      <h1>Action!</h1>
+      <p>Coming Soon</p>
+    </div>
+
+
+  </body>
+</html>
