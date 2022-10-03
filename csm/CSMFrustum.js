@@ -1,126 +1,129 @@
-( function () {
+import { Vector3, Matrix4 } from 'three';
 
-	const inverseProjectionMatrix = new THREE.Matrix4();
+const inverseProjectionMatrix = new Matrix4();
 
-	class CSMFrustum {
+class CSMFrustum {
 
-		constructor( data ) {
+	constructor( data ) {
 
-			data = data || {};
-			this.vertices = {
-				near: [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ],
-				far: [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ]
-			};
+		data = data || {};
 
-			if ( data.projectionMatrix !== undefined ) {
+		this.vertices = {
+			near: [
+				new Vector3(),
+				new Vector3(),
+				new Vector3(),
+				new Vector3()
+			],
+			far: [
+				new Vector3(),
+				new Vector3(),
+				new Vector3(),
+				new Vector3()
+			]
+		};
 
-				this.setFromProjectionMatrix( data.projectionMatrix, data.maxFar || 10000 );
+		if ( data.projectionMatrix !== undefined ) {
 
-			}
-
-		}
-
-		setFromProjectionMatrix( projectionMatrix, maxFar ) {
-
-			const isOrthographic = projectionMatrix.elements[ 2 * 4 + 3 ] === 0;
-			inverseProjectionMatrix.copy( projectionMatrix ).invert(); // 3 --- 0  vertices.near/far order
-			// |     |
-			// 2 --- 1
-			// clip space spans from [-1, 1]
-
-			this.vertices.near[ 0 ].set( 1, 1, - 1 );
-			this.vertices.near[ 1 ].set( 1, - 1, - 1 );
-			this.vertices.near[ 2 ].set( - 1, - 1, - 1 );
-			this.vertices.near[ 3 ].set( - 1, 1, - 1 );
-			this.vertices.near.forEach( function ( v ) {
-
-				v.applyMatrix4( inverseProjectionMatrix );
-
-			} );
-			this.vertices.far[ 0 ].set( 1, 1, 1 );
-			this.vertices.far[ 1 ].set( 1, - 1, 1 );
-			this.vertices.far[ 2 ].set( - 1, - 1, 1 );
-			this.vertices.far[ 3 ].set( - 1, 1, 1 );
-			this.vertices.far.forEach( function ( v ) {
-
-				v.applyMatrix4( inverseProjectionMatrix );
-				const absZ = Math.abs( v.z );
-
-				if ( isOrthographic ) {
-
-					v.z *= Math.min( maxFar / absZ, 1.0 );
-
-				} else {
-
-					v.multiplyScalar( Math.min( maxFar / absZ, 1.0 ) );
-
-				}
-
-			} );
-			return this.vertices;
+			this.setFromProjectionMatrix( data.projectionMatrix, data.maxFar || 10000 );
 
 		}
 
-		split( breaks, target ) {
+	}
 
-			while ( breaks.length > target.length ) {
+	setFromProjectionMatrix( projectionMatrix, maxFar ) {
 
-				target.push( new CSMFrustum() );
+		const isOrthographic = projectionMatrix.elements[ 2 * 4 + 3 ] === 0;
+
+		inverseProjectionMatrix.copy( projectionMatrix ).invert();
+
+		// 3 --- 0  vertices.near/far order
+		// |     |
+		// 2 --- 1
+		// clip space spans from [-1, 1]
+
+		this.vertices.near[ 0 ].set( 1, 1, - 1 );
+		this.vertices.near[ 1 ].set( 1, - 1, - 1 );
+		this.vertices.near[ 2 ].set( - 1, - 1, - 1 );
+		this.vertices.near[ 3 ].set( - 1, 1, - 1 );
+		this.vertices.near.forEach( function ( v ) {
+
+			v.applyMatrix4( inverseProjectionMatrix );
+
+		} );
+
+		this.vertices.far[ 0 ].set( 1, 1, 1 );
+		this.vertices.far[ 1 ].set( 1, - 1, 1 );
+		this.vertices.far[ 2 ].set( - 1, - 1, 1 );
+		this.vertices.far[ 3 ].set( - 1, 1, 1 );
+		this.vertices.far.forEach( function ( v ) {
+
+			v.applyMatrix4( inverseProjectionMatrix );
+
+			const absZ = Math.abs( v.z );
+			if ( isOrthographic ) {
+
+				v.z *= Math.min( maxFar / absZ, 1.0 );
+
+			} else {
+
+				v.multiplyScalar( Math.min( maxFar / absZ, 1.0 ) );
 
 			}
 
-			target.length = breaks.length;
+		} );
 
-			for ( let i = 0; i < breaks.length; i ++ ) {
+		return this.vertices;
 
-				const cascade = target[ i ];
+	}
 
-				if ( i === 0 ) {
+	split( breaks, target ) {
 
-					for ( let j = 0; j < 4; j ++ ) {
+		while ( breaks.length > target.length ) {
 
-						cascade.vertices.near[ j ].copy( this.vertices.near[ j ] );
+			target.push( new CSMFrustum() );
 
-					}
+		}
 
-				} else {
+		target.length = breaks.length;
 
-					for ( let j = 0; j < 4; j ++ ) {
+		for ( let i = 0; i < breaks.length; i ++ ) {
 
-						cascade.vertices.near[ j ].lerpVectors( this.vertices.near[ j ], this.vertices.far[ j ], breaks[ i - 1 ] );
+			const cascade = target[ i ];
 
-					}
+			if ( i === 0 ) {
+
+				for ( let j = 0; j < 4; j ++ ) {
+
+					cascade.vertices.near[ j ].copy( this.vertices.near[ j ] );
 
 				}
 
-				if ( i === breaks.length - 1 ) {
+			} else {
 
-					for ( let j = 0; j < 4; j ++ ) {
+				for ( let j = 0; j < 4; j ++ ) {
 
-						cascade.vertices.far[ j ].copy( this.vertices.far[ j ] );
-
-					}
-
-				} else {
-
-					for ( let j = 0; j < 4; j ++ ) {
-
-						cascade.vertices.far[ j ].lerpVectors( this.vertices.near[ j ], this.vertices.far[ j ], breaks[ i ] );
-
-					}
+					cascade.vertices.near[ j ].lerpVectors( this.vertices.near[ j ], this.vertices.far[ j ], breaks[ i - 1 ] );
 
 				}
 
 			}
 
-		}
+			if ( i === breaks.length - 1 ) {
 
-		toSpace( cameraMatrix, target ) {
+				for ( let j = 0; j < 4; j ++ ) {
 
-			for ( let i = 0; i < 4; i ++ ) {
+					cascade.vertices.far[ j ].copy( this.vertices.far[ j ] );
 
-				target.vertices.near[ i ].copy( this.vertices.near[ i ] ).applyMatrix4( cameraMatrix );
-				target.vertices.far[ i ].copy( this.vertices.far[ i ] ).applyMatrix4( cameraMatrix );
+				}
+
+			} else {
+
+				for ( let j = 0; j < 4; j ++ ) {
+
+					cascade.vertices.far[ j ].lerpVectors( this.vertices.near[ j ], this.vertices.far[ j ], breaks[ i ] );
+
+				}
 
 			}
 
@@ -128,6 +131,22 @@
 
 	}
 
-	THREE.CSMFrustum = CSMFrustum;
+	toSpace( cameraMatrix, target ) {
 
-} )();
+		for ( let i = 0; i < 4; i ++ ) {
+
+			target.vertices.near[ i ]
+				.copy( this.vertices.near[ i ] )
+				.applyMatrix4( cameraMatrix );
+
+			target.vertices.far[ i ]
+				.copy( this.vertices.far[ i ] )
+				.applyMatrix4( cameraMatrix );
+
+		}
+
+	}
+
+}
+
+export { CSMFrustum };
