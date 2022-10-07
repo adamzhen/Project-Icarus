@@ -1,5 +1,5 @@
 # Project-Icarus
-An interactive website created for the NASA Space Apps Challenge 2022
 <p align="center">
+  An interactive website created for the 2022 NASA Space Apps Challenge
   <img src="ProjectIcarusHeader.png" width="750" />
 </p>
